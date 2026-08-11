@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ApexCreator | Pro Analytics & AI Studio</title>
+    <!-- Fontlar -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           TEMA DEĞİŞKENLERİ
+           ========================================================================== */
+        :root {
+            --bg-body: #0b0f19;
+            --bg-card: #151a28;
+            --bg-input: #1f2937;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --border-color: #1e293b;
+            --shadow: 0 8px 30px rgba(0,0,0,0.4);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 280px;
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --bg-input: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 8px 30px rgba(0,0,0,0.05);
+        }
+
+        /* ==========================================================================
+           SIFIRLAMALAR
+           ========================================================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: var(--transition);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ==========================================================================
+           MOBİL HEADER & HAMBURGER
+           ========================================================================== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 900;
+            align-items: center;
+            padding: 0 1rem;
+            justify-content: space-between;
+        }
+
+        .hamburger-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hamburger-btn svg { width: 28px; height: 28px; fill: currentColor; }
+
+        .mobile-brand {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .mobile-brand span { color: var(--accent-blue); }
+
+        /* ==========================================================================
+           SIDEBAR (YAN MENÜ)
+           ========================================================================== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .brand {
+            font-size: 1.8rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            letter-spacing: -1px;
+        }
+        
+        .brand span {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .menu-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .nav-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .nav-btn:hover { background-color: var(--bg-input); color: var(--text-primary); }
+        .nav-btn.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        /* Mobil Arka Plan Karartması */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 950;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* ==========================================================================
+           ANA İÇERİK ALANI
+           ========================================================================== */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            max-width: 1200px;
+            margin-right: auto;
+        }
+
+        .tab-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .page-desc { color: var(--text-secondary); font-size: 1rem; }
+
+        /* Arama Kutuları */
+        .search-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--bg-card);
+            padding: 0.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            min-width: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59,130,246,0.4); }
+
+        /* İstatistik Kartları */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--accent-blue);
+        }
+        
+        .stat-card.purple { border-top-color: var(--accent-purple); }
+        .stat-card.green { border-top-color: var(--accent-green); }
+
+        .stat-title { color: var(--text-secondary); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+        .stat-value { font-size: 2.2rem; font-weight: 900; color: var(--text-primary); margin-top: 0.5rem; }
+
+        /* AI Panelleri */
+        .ai-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+        
+        .ai-header svg { width: 24px; height: 24px; fill: var(--accent-purple); }
+
+        .ai-content { font-size: 1rem; line-height: 1.7; }
+        .ai-content h3 { color: var(--accent-blue); margin: 1rem 0 0.5rem 0; font-size: 1.1rem; }
+        .ai-content ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+        .ai-content strong { color: var(--accent-purple); }
+
+        /* Kapak Fotoğrafı Alanı */
+        .thumbnail-preview {
+            width: 100%;
+            max-width: 600px;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border-color);
+            display: none;
+        }
+
+        /* ==========================================================================
+           AI SOHBET (CHAT) ARAYÜZÜ
+           ========================================================================== */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .chat-history {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .msg-user {
+            background: var(--accent-blue);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-ai {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .chat-input-area input {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            outline: none;
+        }
+
+        /* ==========================================================================
+           BİLDİRİMLER & LOADER
+           ========================================================================== */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--bg-card); border-left: 5px solid var(--accent-red); padding: 1rem; border-radius: var(--radius-md); box-shadow: var(--shadow); color: var(--text-primary); min-width: 300px; transform: translateX(120%); transition: transform 0.3s; }
+        .toast.success { border-left-color: var(--accent-green); }
+        .toast.show { transform: translateX(0); }
+        .toast-title { font-weight: 800; margin-bottom: 0.3rem; display: flex; justify-content: space-between;}
+        .toast-code { font-size: 0.8rem; color: var(--accent-red); }
+
+        .loader {
+            display: none; width: 40px; height: 40px; border: 4px solid var(--border-color);
+            border-bottom-color: var(--accent-blue); border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 2rem auto;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ==========================================================================
+           MOBİL UYUM (MEDYA SORGULARI) - Redmi Note 9 Optimizasyonu
+           ========================================================================== */
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; opacity: 1; }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+                padding-top: 80px; /* Header boşluğu */
+            }
+            
+            .search-container { flex-direction: column; }
+            .btn-primary { justify-content: center; width: 100%; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .chat-container { height: 500px; }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- MOBİL HEADER -->
+    <header class="mobile-header">
+        <div class="mobile-brand">Apex<span>Creator</span></div>
+        <button class="hamburger-btn" onclick="app.toggleMenu()">
+            <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+    </header>
+
+    <!-- MOBİL ARKA PLAN KARARTMA -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="app.toggleMenu()"></div>
+
+    <!-- TOAST BİLDİRİMLERİ -->
+    <div class="toast-container" id="toastBox"></div>
+
+    <!-- ================= SOL MENÜ ================= -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand" style="margin-top: 10px;">
+            <svg viewBox="0 0 24 24" width="32" height="32"><path fill="url(#grad)" d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM12 22v-9M3 8l9 5 9-5"/></svg>
+            Apex<span>Creator</span>
+        </div>
+        <svg style="width:0;height:0;position:absolute;" aria-hidden="true"><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3b82f6" /><stop offset="100%" stop-color="#8b5cf6" /></linearGradient></svg>
+
+        <div class="menu-label">Araçlar</div>
+        <button class="nav-btn active" onclick="app.switchTab('tab-channel', this)">
+            <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            Kanal Analizi
+        </button>
+        <button class="nav-btn" onclick="app.switchTab('tab-video', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            Detaylı Video Analizi
+        </button>
+        <button class="nav-btn" onclick="app.switchTab('tab-thumbnail', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Kapak Fotoğrafı (AI)
+        </button>
+
+        <div class="menu-label">Yapay Zeka</div>
+        <button class="nav-btn" onclick="app.switchTab('tab-chat', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            AI Stüdyo Sohbet
+        </button>
+        
+        <div class="menu-label">Sistem</div>
+        <button class="nav-btn" onclick="app.switchTab('tab-settings', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            API Ayarları
+        </button>
+    </aside>
+
+    <!-- ================= ANA İÇERİK ================= -->
+    <main class="main-content">
+        
+        <!-- SEKME 1: KANAL ANALİZİ -->
+        <section id="tab-channel" class="tab-section active">
+            <div class="page-header">
+                <h1 class="page-title">Kanal İstatistikleri</h1>
+                <p class="page-desc">Kanal Linkini, @kullanıcıadını (örn: @melanno.1lik) girin.</p>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="channelInput" class="search-input" placeholder="Örn: https://youtube.com/@masrimomc?si=123">
+                <button class="btn-primary" onclick="app.analyzeChannel()">Analiz Et</button>
+            </div>
+            
+            <div id="chLoader" class="loader"></div>
+
+            <div id="chResult" style="display:none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Toplam Abone</div>
+                        <div class="stat-value" id="chSubs">0</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-title">Toplam İzlenme</div>
+                        <div class="stat-value" id="chViews">0</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-title">Video Sayısı</div>
+                        <div class="stat-value" id="chVideos">0</div>
+                    </div>
+                </div>
+
+                <div class="ai-panel">
+                    <div class="ai-header"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" fill="none"/></svg>Groq AI Derin Kanal Raporu</div>
+                    <div class="ai-content" id="chAiReport">Yapay zeka bekleniyor...</div>
+                </div>
+            </div>
+        </section>
+
+  <!-- SEKME 2: VİDEO ANALİZİ -->
+        <section id="tab-video" class="tab-section">
+            <div class="page-header">
+                <h1 class="page-title">Detaylı Video Analizi</h1>
+                <p class="page-desc">Video veya Shorts linkini yapıştırın.</p>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="videoInput" class="search-input" placeholder="https://youtube.com/shorts/...">
+                <button class="btn-primary" onclick="app.analyzeVideo()">İncele</button>
+            </div>
+            
+            <div id="vidLoader" class="loader"></div>
+
+            <div id="vidResult" style="display:none;">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-title">İzlenme</div><div class="stat-value" id="vidViews">0</div></div>
+                    <div class="stat-card purple"><div class="stat-title">Beğeni</div><div class="stat-value" id="vidLikes">0</div></div>
+                    <div class="stat-card green"><div class="stat-title">Yorum</div><div class="stat-value" id="vidComments">0</div></div>
+                </div>
+                <div class="ai-panel">
+                    <div class="ai-header"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" fill="none"/></svg>Groq AI Video Performans İncelemesi</div>
+                    <div class="ai-content" id="vidAiReport">AI Analizi bekleniyor...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEKME 3: THUMBNAIL (KAPAK) ANALİZİ -->
+        <section id="tab-thumbnail" class="tab-section">
+            <div class="page-header">
+                <h1 class="page-title">Kapak Fotoğrafı Eleştirisi</h1>
+                <p class="page-desc">Video linkini gir, kapağı çekelim ve başlıkla uyumunu test edelim.</p>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="thumbInput" class="search-input" placeholder="Video Linki...">
+                <button class="btn-primary" onclick="app.analyzeThumbnail()">Kapağı Çek</button>
+            </div>
+            
+            <div id="thumbLoader" class="loader"></div>
+
+            <div id="thumbResult" style="display:none;">
+                <img id="thumbImg" class="thumbnail-preview" src="" alt="Thumbnail">
+                <h3 id="thumbTitle" style="margin-bottom: 1rem; font-size: 1.2rem;"></h3>
+                <div class="ai-panel">
+                    <div class="ai-header">Groq AI Kapak Yorumu</div>
+                    <div class="ai-content" id="thumbAiReport"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEKME 4: YAPAY ZEKA STÜDYO (SOHBET) -->
+        <section id="tab-chat" class="tab-section">
+            <div class="page-header">
+                <h1 class="page-title">AI Stüdyo & Danışman</h1>
+                <p class="page-desc">Başlık önerisi iste, strateji belirle, algoritma sor.</p>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-history" id="chatHistory">
+                    <div class="chat-msg msg-ai">Selam! Ben ApexCreator Yapay Zekası. Bugün kanalın veya sıradaki videon için nasıl bir fikre ihtiyacın var? (Örn: Bana melankolik rap klibi için ilgi çekici başlıklar yaz)</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Mesajını yaz..." onkeypress="if(event.key === 'Enter') app.sendChatMessage()">
+                    <button class="btn-primary" onclick="app.sendChatMessage()">Gönder</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEKME 5: AYARLAR -->
+        <section id="tab-settings" class="tab-section">
+            <div class="page-header">
+                <h1 class="page-title">API Ayarları</h1>
+                <p class="page-desc">Sorunsuz çalışması için güncel anahtarlarınızı girin.</p>
+            </div>
+            <div class="ai-panel" style="max-width: 600px;">
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">YouTube Data API v3 Key</label>
+                    <input type="password" id="ytKeyInput" style="width:100%; padding:1rem; border-radius:8px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">Groq API Key (Llama 3.1)</label>
+                    <input type="password" id="groqKeyInput" style="width:100%; padding:1rem; border-radius:8px; background:var(--bg-input); border:1px solid var(--border-color); color:white;">
+                </div>
+                <button class="btn-primary" onclick="app.saveSettings()">Ayarları Kaydet</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        class ApexCreator {
+            constructor() {
+                this.keys = {
+                    yt: localStorage.getItem('apex_yt_key') || '',
+                    groq: localStorage.getItem('apex_groq_key') || ''
+                };
+                // GÜNCELLENEN GROQ MODELİ: Eski llama3-8b-8192 yerine en yenisi
+                this.groqModel = 'llama-3.1-8b-instant';
+                this.chatMessages = [];
+                
+                this.initUI();
+            }
+
+            initUI() {
+                document.getElementById('ytKeyInput').value = this.keys.yt;
+                document.getElementById('groqKeyInput').value = this.keys.groq;
+            }
+
+            // --- MOBİL MENÜ KONTROLÜ ---
+            toggleMenu() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('show');
+            }
+
+            switchTab(tabId, btnElement) {
+                document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                if(btnElement) btnElement.classList.add('active');
+                
+                // Mobilde sekmeye tıklayınca menüyü kapat
+                if(window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('open');
+                    document.getElementById('sidebarOverlay').classList.remove('show');
+                }
+            }
+
+            showToast(type, title, msg, code = '') {
+                const box = document.getElementById('toastBox');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                let codeHtml = code ? `<div class="toast-code">HATA: ${code}</div>` : '';
+                toast.innerHTML = `<div class="toast-title"><span>${title}</span>${codeHtml}</div><div style="font-size:0.9rem; margin-top:0.5rem; color:var(--text-secondary);">${msg}</div>`;
+                box.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 5000);
+            }
+
+            saveSettings() {
+                this.keys.yt = document.getElementById('ytKeyInput').value.trim();
+                this.keys.groq = document.getElementById('groqKeyInput').value.trim();
+                localStorage.setItem('apex_yt_key', this.keys.yt);
+                localStorage.setItem('apex_groq_key', this.keys.groq);
+                this.showToast('success', 'Kaydedildi', 'API Anahtarları başarıyla güncellendi.');
+            }
+
+            // --- URL TEMİZLEYİCİLER ---
+            extractVideoId(url) {
+                const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                return match ? match[1] : null;
+            }
+
+            cleanChannelHandle(input) {
+                // Eğer içinde @ varsa, @'den sonrasını al, ? parametresi varsa oradan kes. (Örn: @masrimomc?si=123 -> @masrimomc)
+                if (input.includes('@')) {
+                    let handlePart = input.split('@')[1]; // masrimomc?si=123
+                    handlePart = handlePart.split('?')[0]; // masrimomc
+                    handlePart = handlePart.split('/')[0]; // fazladan slash varsa
+                    return '@' + handlePart;
+                }
+                return input;
+            }
+
+            // --- YOUTUBE API ---
+            async fetchYT(endpoint, params) {
+                if (!this.keys.yt) throw new Error('NO_YT_KEY');
+                const query = new URLSearchParams({ ...params, key: this.keys.yt }).toString();
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/${endpoint}?${query}`);
+                if (!res.ok) throw new Error(`HTTP_${res.status}`);
+                return await res.json();
+            }
+
+            // --- GROQ API (GÜNCELLENEN MODEL İLE) ---
+            async fetchGroq(systemPrompt, userPrompt) {
+                if (!this.keys.groq) throw new Error('NO_GROQ_KEY');
+                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${this.keys.groq}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: this.groqModel,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: userPrompt }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error?.message || `HTTP_${res.status}`);
+                
+                let text = data.choices[0].message.content;
+                return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            }
+
+            // --- KANAL ANALİZİ ---
+            async analyzeChannel() {
+                const rawInput = document.getElementById('channelInput').value.trim();
+                if(!rawInput) return;
+                
+                document.getElementById('chResult').style.display = 'none';
+                document.getElementById('chLoader').style.display = 'block';
+
+                try {
+                    let channelId = this.cleanChannelHandle(rawInput); // URL Temizlendi!
+                    
+                    if (channelId.startsWith('@')) {
+                        const searchRes = await this.fetchYT('search', { part: 'id', type: 'channel', q: channelId, maxResults: 1 });
+                        if (!searchRes.items.length) throw new Error('KANAL_BULUNAMADI');
+                        channelId = searchRes.items[0].id.channelId;
+                    }
+
+                    const data = await this.fetchYT('channels', { part: 'snippet,statistics', id: channelId });
+                    if (!data.items.length) throw new Error('KANAL_BULUNAMADI');
+
+                    const stats = data.items[0].statistics;
+                    const snippet = data.items[0].snippet;
+
+                    document.getElementById('chSubs').innerText = Number(stats.subscriberCount).toLocaleString('tr-TR');
+                    document.getElementById('chViews').innerText = Number(stats.viewCount).toLocaleString('tr-TR');
+                    document.getElementById('chVideos').innerText = Number(stats.videoCount).toLocaleString('tr-TR');
+
+                    document.getElementById('chLoader').style.display = 'none';
+                    document.getElementById('chResult').style.display = 'block';
+                    document.getElementById('chAiReport').innerHTML = "AI Analiz ediyor...";
+
+                    // Groq İstek
+                    const sysPrompt = "Sen, YouTube içerik üreticilerine rehberlik eden en üst düzey, sert ve net bir YouTube Analiz ve Strateji Uzmanısın. ASLA 'olmalı', 'olabilir', 'içermelidir' gibi varsayım veya tavsiye bildiren, ihtimalli kelimeler KULLANMA. Analiz ettiğin bir şeyi sanki önünde gerçekleşiyormuş veya oradaymış gibi kesinlik içeren net bir dille yorumla. Ayrıca her analizin en başına mutlaka 0 ile 100 arasında net bir Puan (Örn: Başarı Puanı: 85/100) ekle. Karmaşık, anlaşılmaz akademik cümleler kurma; sokak ağzına yakın ama profesyonel, nokta atışı ve net bir Türkçe ile açıkla. Çıktıları mutlaka HTML formatında (<b>, <br> etiketleri kullanarak) düzenli sun.";
+                    const usrPrompt = `Kanal Adı: ${snippet.title}. Abone: ${stats.subscriberCount}, İzlenme: ${stats.viewCount}, Video: ${stats.videoCount}. 1) Ortalama izlenme hesabı yapıp başarıyı yorumla. 2) Büyüme potansiyeli nedir? 3) Eksikler neler olabilir? Tüm detayları açıkla.`;
+
+                    const aiRes = await this.fetchGroq(sysPrompt, usrPrompt);
+                    document.getElementById('chAiReport').innerHTML = aiRes;
+
+                } catch (e) {
+                    document.getElementById('chLoader').style.display = 'none';
+                    this.showToast('error', 'Hata Oluştu', e.message === 'NO_YT_KEY' ? 'Ayarlardan YouTube API Key girin.' : 'Link hatalı veya bulunamadı.', e.message);
+                }
+            }
+
+            // --- VİDEO ANALİZİ ---
+            async analyzeVideo() {
+                const rawInput = document.getElementById('videoInput').value.trim();
+                const videoId = this.extractVideoId(rawInput);
+                if(!videoId) { this.showToast('error', 'Hata', 'Geçerli bir video linki girin.'); return; }
+
+                document.getElementById('vidResult').style.display = 'none';
+                document.getElementById('vidLoader').style.display = 'block';
+
+                try {
+                    const data = await this.fetchYT('videos', { part: 'snippet,statistics', id: videoId });
+                    if (!data.items.length) throw new Error('VIDEO_BULUNAMADI');
+
+                    const stats = data.items[0].statistics;
+                    const snippet = data.items[0].snippet;
+                    const tags = snippet.tags ? snippet.tags.join(', ') : 'Etiket kullanılmamış';
+
+                    document.getElementById('vidViews').innerText = Number(stats.viewCount).toLocaleString('tr-TR');
+                    document.getElementById('vidLikes').innerText = Number(stats.likeCount || 0).toLocaleString('tr-TR');
+                    document.getElementById('vidComments').innerText = Number(stats.commentCount || 0).toLocaleString('tr-TR');
+
+                    document.getElementById('vidLoader').style.display = 'none';
+                    document.getElementById('vidResult').style.display = 'block';
+                    document.getElementById('vidAiReport').innerHTML = "AI Analiz ediyor...";
+
+                    const sysPrompt = "Sen acımasız bir YouTube SEO ve Algoritma uzmanısın. Videonun her şeyini detaylıca, profesyonelce Türkçe olarak açıkla. HTML (<br>, <b>) kullan.";
+                    const usrPrompt = `Başlık: "${snippet.title}". İzlenme: ${stats.viewCount}, Beğeni: ${stats.likeCount}. Etiketler: ${tags}. Açıklama: ${snippet.description.substring(0,200)}. 
+                    Senden İstenenler: 
+                    1) Videonun başlığı ilgi çekici mi? Neden?
+                    2) Etkileşim oranı (İzlenme/Beğeni) algoritmaya göre başarılı mı?
+                    3) Kullanılan etiketler SEO açısından doğru mu, ne eksik?
+                    4) Bu videoyu algoritma neden öne çıkartır veya neden geriye iter, videonun her şeyini açıkla!`;
+
+                    const aiRes = await this.fetchGroq(sysPrompt, usrPrompt);
+                    document.getElementById('vidAiReport').innerHTML = aiRes;
+
+                } catch(e) {
+                    document.getElementById('vidLoader').style.display = 'none';
+                    this.showToast('error', 'Hata Oluştu', e.message);
+                }
+            }
+
+            // --- KAPAK FOTOĞRAFI (THUMBNAIL) ANALİZİ ---
+            async analyzeThumbnail() {
+                const rawInput = document.getElementById('thumbInput').value.trim();
+                const videoId = this.extractVideoId(rawInput);
+                if(!videoId) { this.showToast('error', 'Hata', 'Video linki girin.'); return; }
+
+                document.getElementById('thumbResult').style.display = 'none';
+                document.getElementById('thumbLoader').style.display = 'block';
+
+                try {
+                    // Video başlığını çek (Bağlam için AI'a lazım)
+                    const data = await this.fetchYT('videos', { part: 'snippet', id: videoId });
+                    if (!data.items.length) throw new Error('VIDEO_BULUNAMADI');
+                    const title = data.items[0].snippet.title;
+                    
+                    // Kapak resmi URL'si (Max Resolution)
+                    const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    
+                    document.getElementById('thumbImg').src = thumbUrl;
+                    document.getElementById('thumbImg').style.display = 'block';
+                    document.getElementById('thumbTitle').innerText = `Başlık: ${title}`;
+
+                    document.getElementById('thumbLoader').style.display = 'none';
+                    document.getElementById('thumbResult').style.display = 'block';
+                    document.getElementById('thumbAiReport').innerHTML = "AI Başlık ve Kapak Fikrini Değerlendiriyor...";
+
+                    // Groq (Llama 3.1) ile analiz (Metin tabanlı mantıksal ilişki analizi)
+                    const sysPrompt = "Sen bir YouTube Tasarım ve CTR (Tıklanma Oranı) uzmanısın. Sert eleştiriler yap.";
+                    const usrPrompt = `Bir videonun başlığı şu: "${title}". 
+                    YouTube kurallarına göre, bu başlığa sahip bir videonun kapak fotoğrafında (thumbnail) sence neler olmalı? 
+                    Renkler, yazılar, yüz ifadeleri nasıl olmalı? Tıklanma oranını artıracak 3 kapak fotoğrafı konsepti tasarla ve anlat.`;
+
+                    const aiRes = await this.fetchGroq(sysPrompt, usrPrompt);
+                    document.getElementById('thumbAiReport').innerHTML = aiRes;
+
+                } catch(e) {
+                    document.getElementById('thumbLoader').style.display = 'none';
+                    this.showToast('error', 'Hata', e.message);
+                }
+            }
+
+ // --- AI SOHBET STÜDYOSU ---
+            async sendChatMessage() {
+                const inputEl = document.getElementById('chatInput');
+                const text = inputEl.value.trim();
+                if(!text) return;
+
+                const historyEl = document.getElementById('chatHistory');
+                
+                // Kullanıcı Mesajını Ekle
+                historyEl.innerHTML += `<div class="chat-msg msg-user">${text}</div>`;
+                inputEl.value = '';
+                historyEl.scrollTop = historyEl.scrollHeight;
+                
+                // AI Bekleme Mesajı
+                const typingId = 'typing_' + Date.now();
+                historyEl.innerHTML += `<div class="chat-msg msg-ai" id="${typingId}">...</div>`;
+                historyEl.scrollTop = historyEl.scrollHeight;
+
+                // Geçmişi API Formatına Çevir
+                this.chatMessages.push({ role: 'user', content: text });
+                
+                // Sistem Konsepti
+                const systemMsg = { 
+                    role: 'system', 
+                    content: "Sen profesyonel bir YouTube İçerik Danışmanısın. Kullanıcıya başlık önerileri, içerik fikirleri ve stratejiler sun. Kısa, net ve samimi ol. (Cevapları düz metin/markdown ver)." 
+                };
+                
+                // Groq API Chat İsteği (Manuel Fetch formatı)
+                try {
+                    if (!this.keys.groq) throw new Error('API Key Eksik');
+                    
+                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${this.keys.groq}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: this.groqModel,
+                            messages: [systemMsg, ...this.chatMessages],
+                            temperature: 0.8
+                        })
+                    });
+                    
+                    if(!res.ok) throw new Error('API Bağlantı Hatası');
+                    const data = await res.json();
+                    const aiText = data.choices[0].message.content;
+                    
+                    this.chatMessages.push({ role: 'assistant', content: aiText });
+                    
+                    // Mesajı Ekrana Yazdır
+                    document.getElementById(typingId).innerHTML = aiText.replace(/\n/g, '<br>');
+                    historyEl.scrollTop = historyEl.scrollHeight;
+
+                } catch (e) {
+                    document.getElementById(typingId).innerHTML = `Hata: ${e.message}. Ayarlardan Groq Llama 3.1 API Key girin.`;
+                }
+            }
+        }
+
+        // Başlat
+        const app = new ApexCreator();
+    </script>
+</body>
+</html>
